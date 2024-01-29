@@ -4,3 +4,7 @@
           - kNN model
           - Linear Model with and without Cross-validation
           
+1/29/2024 - Ross practed creating more ML models with data built into R. These also went into the "Practicing" folder
+          - Confusion Matrix verification for generalized linear regression
+          - Random Forest
+          
