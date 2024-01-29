@@ -7,4 +7,10 @@
 1/29/2024 - Ross practed creating more ML models with data built into R. These also went into the "Practicing" folder
           - Confusion Matrix verification for generalized linear regression
           - Random Forest
+          - ROC Curve with a generlized linear regression
+          - Model selection using a common set of training data with holes
+              - GLM
+              - RF
+              - kNN
+              
           
