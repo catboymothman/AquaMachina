@@ -1,20 +1,26 @@
-# Practing Model Selection
-# Using a common set of training data, determine which model is most accurate at predicitng the testing data
+# Practicing Model Selection
+# Using a common set of training data, determine which model is most accurate at predicting the testing data
 # Created by Ross Nygard on 1/29/2024
-# Last modified by Ross Nygard on 1/29/2024 at 6:29 pm
+# Last modified by Ross Nygard on 1/30/2024 at 11:50 am
 
-install.packages("C50")
-install.packages("modeldata")
-install.packages("glmnet")
-install.packages("Matrix")
+# install.packages("C50")
+# install.packages("modeldata")
+# install.packages("glmnet")
+# install.packages("Matrix")
+# install.packages("caret")
+# install.packages("kernlab")
+# install.packages("naivebayes")
 
-library("modeldata") # Contains the 'mlc_churn' data used for practice
-library("C50") # Contains churn data
-library("caret") # Using the 'train' function
-library("glmnet") # Required to use the glmnet method
-library("Matrix") # Required to use the glmnet method
 
-data(mlc_churn) # Loads in the data used for this practic
+library("modeldata")  # Contains the 'mlc_churn' data used for practice
+library("C50")        # Contains churn data
+library("caret")      # Using the 'train' function
+library("glmnet")     # Required to use the glmnet method
+library("Matrix")     # Required to use the glmnet method
+library("kernlab")    # Required to use the svm linear method
+library("naivebayes") # Required for the naive bayes method
+
+data(mlc_churn) # Loads in the data used for this practice
 
 set.seed(43) # Set a specific seed to prevent randomness generating a new set of samples
 
@@ -55,8 +61,9 @@ glm_model <- train(churn ~ ., # Determines the output
                    )
 print(glm_model)
 glm_plot <- plot(glm_model)
+glm_plot # blue line is alpha = 0, pink is alpha = 1, x-axis is value of lambda, and y-axis is measure of accuracy
 
-# Developing a random forest model
+# Create a random forest model
 rf_model <- train(churn ~ .,
                   churnTrain,
                   metric = "ROC", # Same metric as before
@@ -70,17 +77,73 @@ rf_model <- train(churn ~ .,
                   )
 print(rf_model)
 rf_plot <- plot(rf_model)
+rf_plot # Blue is gini splitting rule and pink is extra trees splitting rule. y-axis is accuracy, and x-axis is number random predictors
 
-# Developing a kNN model
+# Create a kNN model
 knn_model <- train(churn ~ .,
              churnTrain,
              metric = "ROC", # same metric as before
              method = "knn", # kNN method
-             tuneLength = 20, # Number of tuning parameters, 20 bc the data contains 20 columns
-             trControl = my_control)
+             tuneLength = 20, # Number of tuning parameters, 20 because the data contains 20 columns
+             trControl = my_control
+             )
 print(knn_model)
 knn_plot <- plot(knn_model)
+knn_plot # x-axis is the number of neighbors considered, and y-axis is accuracy
 
+# Create a Support Vector Machine (svm) model, using a linear basis first
+svm_lin_model <- train(churn ~ .,
+                   churnTrain,
+                   metric = "ROC", # Same metric as before
+                   method = "svmLinear", # Will do a radial one next; assumes linear grid for data distribution
+                   tuneGrid = expand.grid(
+                     C = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100) # Values of C randomly selected, can be refined later if this method is chosen
+                   ),
+                   trControl = my_control
+                   )
+print(svm_lin_model)
+svm_lin_plot <- plot(svm_lin_model) # y-axis is accuracy, x-axis is a penalty for inaccuracy when testing
+svm_lin_plot
+
+# Create an svm radial model
+svm_rad_model <- train(churn ~ .,
+                       churnTrain,
+                       metric = "ROC", # Same as before
+                       method = "svmRadial", # Radial basis for svm rather than linear; assumes radial grid for data distribution
+                       tuneLength = 10, # randomly selected
+                       trControl = my_control
+                       )
+print(svm_rad_model)
+svm_rad_plot <- plot(svm_rad_model)
+svm_rad_plot # y-axis is accuracy, x-axis is a penalty for inaccuracy when testing
+
+# Create a Naive-Bayes model
+nb_model <- train(churn ~ .,
+                  churnTrain,
+                  metric = "ROC",
+                  method = "naive_bayes", # Naive bayes model type
+                  trControl = my_control
+                  )
+print(nb_model)
+nb_plot <- plot(nb_model)
+nb_plot # x-axis is the yes/no for whether customers disconnected and the y-axis is how accurate the model is at predicting them
+
+# Comparing all the different models
+model_list <- list(glmnet = glm_model,
+                   rf = rf_model,
+                   knn = knn_model,
+                   svm_lin = svm_lin_model,
+                   svm_rad = svm_rad_model,
+                   nb = nb_model)
+resamp = resamples(model_list) # collects, analyzes, and visualizes a set of resampling results from a common data set, ie churnTest
+print(resamp)
+summary(resamp)
+
+lattice::bwplot(resamp, metric = "ROC") # Graphically compare the different model types using a box and whiskers plot
+
+# Using model on set aside test data
+p <- predict(rf_model, churnTest)
+confusionMatrix(p, churnTest$churn)
 
 
 
