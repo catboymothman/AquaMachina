@@ -1,0 +1,16 @@
+---
+title: "neuralNetworkPractice"
+author: "Rita Hippe"
+date: "2024-01-31"
+output: html_document
+---
+
+```{r}
+# run in console:
+#install.packages(c('neuralnet','keras','tensorflow'),dependencies = T)
+
+library(tidyverse)
+library(neuralnet)
+library(ggplot2)
+
+```
