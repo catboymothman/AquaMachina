@@ -1,0 +1,80 @@
+---
+title: "dataCombining"
+author: "Ross Nygard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+> HEY ANYTHING I PUT IN LIKE THIS WILL PROB WANNA BE DELETED LATER JUST AN FYI
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Setting up the rain event data frame
+
+This code chunk will serve to modify the rain event characteristic data frame to be more easily compared to the other data frames developed later.
+```{r Rain Event}
+# Rainfall/Runoff Characteristics
+RF_RO_chara.df <- read_csv('Data/commaSeparatedValues/RF_RO_Event_Characteristics.csv',
+                           col_types = cols(.default = col_character())) %>%
+# Rename columns to include units
+  rename("PHD [hr]" = "PHD",                  # Previous dry hours
+         "d_rain [min]" = "d_rain",           # Duration of the rain event
+         "h_rain [in]" = "h_rain",            # Depth of the rain event
+         "i_rain-max [mm/hr]" = "i_rain-max", # Rainfall maximum intensity
+         "IPRT [min]" = "IPRT",               # Initial pavement residence time
+         "V_runoff [L]" = "V_runoff",         # Volume of runoff
+         "C [-]" = "C",                       # Runoff coefficient
+         "Q_inf-max [L/s]" = "Qinf-max",      # Maximum influent flow rate
+         "Q_inf-avg [L/s]" = "Qinf-avg",      # Average influent flow rate
+         "Q_eff-max [L/s]" = "Qeff-max",      # Maximum effluent flow rate
+         "Q_eff-avg [L/s]" = "Qeff-avg",      # Average effluent flow rate
+         "n_inf [-]" = "n_inf",               # Number of influent samples
+         "n_eff [-]" = "n_eff") %>%            # Number of effluent samples
+  slice(-1) %>%  # Remove the row containing units
+  select(-Event) # Remove the event count column
+```
+
+## Setting up the rain characteristic data frame
+
+This code chunk will serve to combine multiple files into one rain characteristic data frame.
+
+```{r}
+# Read in RainMeanCharacteristics1.csv
+rain_chara_1.df <- read_csv("Data/commaSeparatedValues/RainMeanCharacteristics1.csv",
+                            col_types = cols(.default = col_character())) %>% # Read in the file
+  # Rename columns to include units
+  rename("Date" = "Rainfall/Runoff event",   # Date for ease of joining later
+         "Cl(-) [ug/L]" = "Cl(-)",           # Chloride concentration
+         "SO4(2-) [ug/L]" = "SO4 (2-)",      # Sulfate concentration
+         "PO4(3-) [ug/L]" = "PO4 (3-)",      # Phosphate concentration
+         "NH3-N [ug/L]" = "NH3-N",           # Ammonia concentration
+         "NO3(-)-N [ug/L]" = "NO3(-)-N",     # Nitrate concentration
+         "TDN [ug/L]" = "TDN",               # Total dissolved nitrogen
+         "COD [mg/L]" = "COD",               # Chemical oxygen demand
+         "Turbidity [NTU]" = "Turbidity",    # Turbidity
+         "NO2(-)-N [ug/L]" = "NO2(-)-N") %>% # Nitrite concentration
+  slice(-1) # Remove the row containing units
+
+# Read in RainMeanCharacteristics2.csv
+rain_chara_2.df <- read_csv("Data/commaSeparatedValues/RainMeanCharacteristics2.csv",
+                            col_types = cols(.default = col_character())) %>%  # Units were already included in top row, so full renaming is not necessary
+  rename("Date" = `Rainfall/Runoff event`)
+
+rain_chara_full.df <- full_join(rain_chara_1.df, rain_chara_2.df, by = "Date")
+```
+
+
+## Setting up influent data frame
+
+This code chunk will serve to combine multiple data sets into one influent average characteristic dataframe.
+
+> Would it be helpful to keep the max and mins for each characteristic in?
+
+```{r}
+
+```
+
+
+
