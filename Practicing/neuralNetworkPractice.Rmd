@@ -9,6 +9,7 @@ output: html_document
 # run in console:
 #install.packages(c('neuralnet','keras','tensorflow'),dependencies = T)
 
+
 library(tidyverse)
 library(MASS) # data
 library(neuralnet) 
