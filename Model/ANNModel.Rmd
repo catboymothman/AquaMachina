@@ -1,0 +1,104 @@
+---
+title: "ANNmodel"
+author: "Rita Hippe"
+date: "2024-01-31"
+output: html_document
+---
+
+```{r}
+# run in console:
+#install.packages(c('neuralnet','keras','tensorflow'),dependencies = T)
+
+library(tidyverse)
+library(MASS) # data
+library(neuralnet) 
+library(ggplot2)
+library(dplyr)
+
+data_raw <- read_csv("BaffleMLData.csv", col_types = cols(.default = col_number()))
+data <- data_raw %>%
+        mutate(length = `Basin Length (ft)`,
+               width = `Basin Width (ft)`,
+               baffle_num = `Number of Baffles`,
+               efficiency = `PM Separation Efficiency (%)`,
+               cost = `Cost($)`)
+data <- data[ ,6:10]
+```
+
+# Get data
+```{r}
+sampledata <- Boston
+
+#apply(data,2,function(x) sum(is.na(x))) # run to make sure no missing data
+
+
+set.seed(500)
+
+
+index <- sample(1:nrow(data),round(0.75*nrow(data)))
+train <- data[index,]
+test <- data[-index,]
+lm.fit <- glm(cost~., data=train) # fitting reg linear regression model
+#summary(lm.fit)
+pr.lm <- predict(lm.fit,test)
+MSE.lm <- sum((pr.lm - test$cost)^2)/nrow(test) # MSE is mean squared error
+
+```
+
+# Train neural network
+```{r}
+
+# Randomly selecting rows to assign to be part of training or testing data
+
+maxs <- apply(data, 2, max) 
+mins <- apply(data, 2, min)
+scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins)) # normalizing data!!!
+train_ <- scaled[index,]
+test_ <- scaled[-index,]
+
+
+n <- names(train_)
+f <- as.formula(paste("cost ~", paste(n[!n %in% "cost"], collapse = " + ")))
+nn <- neuralnet(f,data=train_,hidden=c(5,3),linear.output=T)
+
+plot(nn)
+```
+
+# Test neural network
+```{r}
+pr.nn <- compute(nn,test_[,1:4])
+pr.nn_ <- pr.nn$net.result*(max(data$cost)-min(data$cost))+min(data$cost)
+test.r <- (test_$cost)*(max(data$cost)-min(data$cost))+min(data$cost)
+MSE.nn <- sum((test.r - pr.nn_)^2)/nrow(test_)
+
+
+
+print(paste0("Linear regression MSE: ",MSE.lm," and neural network MSE: ",MSE.nn))
+
+
+```
+
+# Comparing Predictions of NN and lm
+```{r}
+
+par(mfrow=c(1,2))
+plot(test$cost,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend='NN',pch=18,col='red', bty='n')
+plot(test$cost,pr.lm,col='blue',main='Real vs predicted lm',pch=18, cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
+
+plot(test$cost,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+points(test$cost,pr.lm,col='blue',pch=18,cex=0.7)
+abline(0,1,lwd=2)
+legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
+```
+
+
+Resources
+```{r}
+# https://datascienceplus.com/fitting-neural-network-in-r/
+
+
+```
