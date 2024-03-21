@@ -3,7 +3,7 @@
     "path": "C:/Users/autum/Sites/AquaMachina/Model/ANNModel.Rmd",
     "project_path": "Model/ANNModel.Rmd",
     "type": "r_markdown",
-    "hash": "322991791",
+    "hash": "741653254",
     "contents": "",
     "dirty": false,
     "created": 1711046852899.0,
@@ -12,16 +12,16 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "183,0",
+        "cursorPosition": "188,0",
         "scrollLine": "176",
         "disableDependencyDiscovery": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1711048098,
+    "lastKnownWriteTime": 1711048955,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1711048098804,
+    "last_content_update": 1711048955631,
     "read_only": false,
     "read_only_alternatives": []
 }

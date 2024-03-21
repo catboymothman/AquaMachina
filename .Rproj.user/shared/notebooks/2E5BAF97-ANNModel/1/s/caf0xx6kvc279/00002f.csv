@@ -1,3 +1,5 @@
 "0",""
+"0","set.seed(500)"
+"0",""
 "0","par(mfrow=c(1,2))"
 "0","plot(test$efficiency,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)"

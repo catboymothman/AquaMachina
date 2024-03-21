@@ -52,11 +52,11 @@ RMSE.lm <- sqrt(sum((pr.lm - test$cost)^2)/nrow(test)) # RMSE is root mean squar
 maxs <- apply(data, 2, max) 
 mins <- apply(data, 2, min)
 scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins)) # normalizing data!!!
-train_ <- scaled[index,]
-test_ <- scaled[-index,]
+train_ann <- scaled[index,]
+test_ann <- scaled[-index,]
 
 
-n <- names(train_)
+n <- names(train_ann)
 f <- as.formula(paste("cost ~", paste(n[!n %in% "cost"], collapse = " + ")))
 nn <- neuralnet(f,data=train_,hidden=c(5,3),linear.output=T)
 
@@ -67,8 +67,8 @@ plot(nn)
 ```{r}
 pr.nn <- compute(nn,test_[,1:4])
 pr.nn_ <- pr.nn$net.result*(max(data$cost)-min(data$cost))+min(data$cost)
-test.r <- (test_$cost)*(max(data$cost)-min(data$cost))+min(data$cost)
-RMSE.nn <- sqrt(sum((test.r - pr.nn_)^2)/nrow(test_))
+test.r <- (test_ann$cost)*(max(data$cost)-min(data$cost))+min(data$cost)
+RMSE.nn <- sqrt(sum((test.r - pr.nn_)^2)/nrow(test_ann))
 
 
 
@@ -82,14 +82,14 @@ print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.
 ```{r}
 
 par(mfrow=c(1,2))
-plot(test$cost,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+plot(test$cost,pr.nn_,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend='NN',pch=18,col='red', bty='n')
-plot(test$cost,pr.lm,col='blue',main='Real vs predicted lm',pch=18, cex=0.7)
+plot(test$cost,pr.lm,col='blue',main='Real cost vs predicted cost lm',pch=18, cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
 
-plot(test$cost,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+plot(test$cost,pr.nn_,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
 points(test$cost,pr.lm,col='blue',pch=18,cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
@@ -110,8 +110,6 @@ combined <- as.data.frame(test[ ,1:3]) %>%
 #sampledata <- Boston
 
 #apply(data,2,function(x) sum(is.na(x))) # run to make sure no missing data
-
-set.seed(500)
 
 index <- sample(1:nrow(data),round(0.75*nrow(data)))
 train <- data[index,]
@@ -161,6 +159,8 @@ print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.
 # Comparing Predictions of NN and lm
 ```{r}
 
+set.seed(500)
+
 par(mfrow=c(1,2))
 plot(test$efficiency,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
 abline(0,1,lwd=2)
@@ -181,6 +181,13 @@ legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 combined <- combined %>%
             mutate(nn_efficiency = c(test.r))
 write.csv(combined, "MLPredictedData.csv")
+```
+
+## Predicting Efficient Size and Number of Baffles
+```{r}
+
+
+
 ```
 
 Resources
