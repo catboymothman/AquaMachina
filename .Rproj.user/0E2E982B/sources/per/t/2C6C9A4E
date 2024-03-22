@@ -3,7 +3,7 @@
     "path": "C:/Users/autum/Sites/AquaMachina/CHANGELOG",
     "project_path": "CHANGELOG",
     "type": "text",
-    "hash": "2582863380",
+    "hash": "528091812",
     "contents": "",
     "dirty": false,
     "created": 1711046838177.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "41,31",
-        "scrollLine": "20"
+        "cursorPosition": "43,129",
+        "scrollLine": "24"
     },
     "folds": "",
-    "lastKnownWriteTime": 1711048120,
+    "lastKnownWriteTime": 1711066638,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1711048120265,
+    "last_content_update": 1711066638727,
     "read_only": false,
     "read_only_alternatives": []
 }

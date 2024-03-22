@@ -1,0 +1,3 @@
+"0","combined <- as.data.frame(test[ ,1:3]) %>%"
+"0","            mutate(lm_cost = c(as.numeric(pr.lm.cost)))"
+"0",""

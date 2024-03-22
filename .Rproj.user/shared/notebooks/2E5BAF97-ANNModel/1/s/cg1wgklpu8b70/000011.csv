@@ -15,3 +15,7 @@
 "0","               efficiency = `PM Separation Efficiency (%)`,"
 "0","               cost = `Cost($)`)"
 "0","data <- data[ ,6:10]"
+"0",""
+"0","data_cost <- data %>% # Create data set to train model for cost prediction"
+"0","  select(-efficiency)"
+"0",""

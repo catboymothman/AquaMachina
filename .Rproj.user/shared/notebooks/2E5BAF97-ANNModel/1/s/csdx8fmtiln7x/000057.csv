@@ -1,2 +1,0 @@
-"0",""
-"0","plot(test$cost,pr.nn_,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)"

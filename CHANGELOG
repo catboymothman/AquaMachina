@@ -40,3 +40,6 @@
           
 3/21/2024 - Updated cost data for training data
           - Changed MSE to RMSE
+          - Tested different numbers of neurons and optimized the ANN
+          - Modified training sets for cost to not include efficiency, and modified efficiency training sets to not include costs
+          

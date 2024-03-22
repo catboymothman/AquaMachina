@@ -23,6 +23,10 @@ data <- data_raw %>%
                efficiency = `PM Separation Efficiency (%)`,
                cost = `Cost($)`)
 data <- data[ ,6:10]
+
+data_cost <- data %>% # Create data set to train model for cost prediction
+  select(-efficiency)
+
 ```
 
 ## COST
@@ -34,13 +38,13 @@ data <- data[ ,6:10]
 set.seed(500)
 
 
-index <- sample(1:nrow(data),round(0.75*nrow(data)))
-train <- data[index,]
-test <- data[-index,]
-lm.fit <- glm(cost~., data=train) # fitting reg linear regression model
+index <- sample(1:nrow(data_cost),round(0.75*nrow(data_cost)))
+train <- data_cost[index,]
+test <- data_cost[-index,]
+lm.cost <- glm(cost~., data=train) # fitting reg linear regression model
 #summary(lm.fit)
-pr.lm <- predict(lm.fit,test)
-RMSE.lm <- sqrt(sum((pr.lm - test$cost)^2)/nrow(test)) # RMSE is root mean squared error
+pr.lm.cost <- predict(lm.cost,test)
+RMSE.lm.cost <- sqrt(sum((pr.lm.cost - test$cost)^2)/nrow(test)) # RMSE is root mean squared error
 
 ```
 
@@ -49,32 +53,32 @@ RMSE.lm <- sqrt(sum((pr.lm - test$cost)^2)/nrow(test)) # RMSE is root mean squar
 
 # Randomly selecting rows to assign to be part of training or testing data
 
-maxs <- apply(data, 2, max) 
-mins <- apply(data, 2, min)
-scaled <- as.data.frame(scale(data, center = mins, scale = maxs - mins)) # normalizing data!!!
+maxs <- apply(data_cost, 2, max) 
+mins <- apply(data_cost, 2, min)
+scaled <- as.data.frame(scale(data_cost, center = mins, scale = maxs - mins)) # normalizing data!!!
 train_ann <- scaled[index,]
 test_ann <- scaled[-index,]
 
 
 n <- names(train_ann)
 f <- as.formula(paste("cost ~", paste(n[!n %in% "cost"], collapse = " + ")))
-nn <- neuralnet(f,data=train_,hidden=c(5,3),linear.output=T)
+nn.cost <- neuralnet(f,data=train_ann,hidden=c(3,linear.output=T))
 
-plot(nn)
+plot(nn.cost)
 ```
 
 # Test neural network
 ```{r}
-pr.nn <- compute(nn,test_[,1:4])
-pr.nn_ <- pr.nn$net.result*(max(data$cost)-min(data$cost))+min(data$cost)
-test.r <- (test_ann$cost)*(max(data$cost)-min(data$cost))+min(data$cost)
-RMSE.nn <- sqrt(sum((test.r - pr.nn_)^2)/nrow(test_ann))
+pr.nn.cost <- compute(nn.cost,test_ann[,1:4])
+pr.nn_.cost <- pr.nn.cost$net.result*(max(data_cost$cost)-min(data_cost$cost))+min(data_cost$cost)
+test.r <- (test_ann$cost)*(max(data_cost$cost)-min(data_cost$cost))+min(data_cost$cost)
+RMSE.nn.cost <- sqrt(sum((test.r - pr.nn_.cost)^2)/nrow(test_ann))
 
 
 
-print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.nn))
+print(paste0("Linear regression RMSE: ",RMSE.lm.cost," and neural network RMSE: ",RMSE.nn.cost))
 
-# Since LM MSE is less than NN MSE, we will proceed with LM for cost
+# Since LM RMSE is less than NN RMSE, we will proceed with LM for cost
 
 ```
 
@@ -82,15 +86,15 @@ print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.
 ```{r}
 
 par(mfrow=c(1,2))
-plot(test$cost,pr.nn_,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
+plot(test$cost,pr.nn_.cost,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend='NN',pch=18,col='red', bty='n')
-plot(test$cost,pr.lm,col='blue',main='Real cost vs predicted cost lm',pch=18, cex=0.7)
+plot(test$cost,pr.lm.cost,col='blue',main='Real cost vs predicted cost lm',pch=18, cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
 
-plot(test$cost,pr.nn_,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
-points(test$cost,pr.lm,col='blue',pch=18,cex=0.7)
+plot(test$cost,pr.nn_.cost,col='red',main='Real cost vs predicted cost NN',pch=18,cex=0.7)
+points(test$cost,pr.lm.cost,col='blue',pch=18,cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 ```
@@ -98,7 +102,7 @@ legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 # LM Predicted Values
 ```{r}
 combined <- as.data.frame(test[ ,1:3]) %>%
-            mutate(lm_cost = c(as.numeric(pr.lm)))
+            mutate(lm_cost = c(as.numeric(pr.lm.cost)))
 
 ```
 
@@ -114,10 +118,10 @@ combined <- as.data.frame(test[ ,1:3]) %>%
 index <- sample(1:nrow(data),round(0.75*nrow(data)))
 train <- data[index,]
 test <- data[-index,]
-lm.fit <- glm(efficiency~., data=train) # fitting reg linear regression model
+lm.eff <- glm(efficiency~., data=train) # fitting reg linear regression model
 # summary(lm.fit)
-pr.lm <- predict(lm.fit,test)
-MSE.lm <- sum((pr.lm - test$efficiency)^2)/nrow(test) # MSE is mean squared error
+pr.lm.eff <- predict(lm.eff,test)
+RMSE.lm.eff <- sqrt(sum((pr.lm.eff - test$efficiency)^2)/nrow(test)) # MSE is mean squared error
 
 ```
 
@@ -135,23 +139,23 @@ test_ann <- scaled[-index,]
 
 n <- names(train_ann)
 f <- as.formula(paste("efficiency ~", paste(n[!n %in% "efficiency"], collapse = " + ")))
-nn <- neuralnet(f,data=train_,hidden=c(5,3),linear.output=T)
+nn.eff <- neuralnet(f,data=train_ann,hidden=c(5,3),linear.output=T)
 
-plot(nn)
+plot(nn.eff)
 ```
 
 # Test neural network
 ```{r}
-pr.nn <- compute(nn,test_[,1:4])
-pr.nn_ <- pr.nn$net.result*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
+pr.nn.eff <- compute(nn.eff,test_ann[,1:4])
+pr.nn_.eff <- pr.nn.eff$net.result*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
 test.r <- (test_ann$efficiency)*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
-RMSE.nn <- sqrt(sum((test.r - pr.nn_)^2)/nrow(test_ann))
+RMSE.nn.eff <- sqrt(sum((test.r - pr.nn_.eff)^2)/nrow(test_ann))
 
 
 
-print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.nn))
+print(paste0("Linear regression RMSE: ",RMSE.lm.eff," and neural network RMSE: ",RMSE.nn.eff))
 
-# Since NN MSE is less than LM MSE, we will proceed with NN for efficiency
+# Since NN RMSE is less than LM RMSE, we will proceed with NN for efficiency
 
 
 ```
@@ -162,15 +166,15 @@ print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.
 set.seed(500)
 
 par(mfrow=c(1,2))
-plot(test$efficiency,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
+plot(test$efficiency,pr.nn_.eff,col='red',main='Real vs predicted efficiency NN',pch=18,cex=0.7, xlim = c(99.85,99.95))
 abline(0,1,lwd=2)
 legend('bottomright',legend='NN',pch=18,col='red', bty='n')
-plot(test$efficiency,pr.lm,col='blue',main='Real vs predicted lm',pch=18, cex=0.7)
+plot(test$efficiency,pr.lm.eff,col='blue',main='Real vs predicted efficiency lm',pch=18, cex=0.7, xlim = c(99.85,99.95))
 abline(0,1,lwd=2)
 legend('bottomright',legend='LM',pch=18,col='blue', bty='n', cex=.95)
 
-plot(test$efficiency,pr.nn_,col='red',main='Real vs predicted NN',pch=18,cex=0.7)
-points(test$cost,pr.lm,col='blue',pch=18,cex=0.7)
+plot(test$efficiency,pr.nn_.eff,col='red',main='Real vs predicted efficiency NN',pch=18,cex=0.7, xlim = c(99.85,99.95))
+points(test$efficiency,pr.lm.eff,col='blue',pch=18,cex=0.7)
 abline(0,1,lwd=2)
 legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 ```
@@ -186,8 +190,17 @@ write.csv(combined, "MLPredictedData.csv")
 ## Predicting Efficient Size and Number of Baffles
 ```{r}
 
+basin_test <- data.frame(length = rep(seq(140, 160, by = 1), each = 6),
+                      width = rep(0,each = 126),
+                      baffle_num = rep(c(0,1,3,5,7,9), times = 21)
+                      )%>%
+  mutate(width = length/10)
 
+basin_pr <- basin_test
 
+basin_pr$cost <- predict(lm.cost, basin_test)
+
+basin_pr$efficiency <- predict(nn.eff, basin_pr)
 ```
 
 Resources
