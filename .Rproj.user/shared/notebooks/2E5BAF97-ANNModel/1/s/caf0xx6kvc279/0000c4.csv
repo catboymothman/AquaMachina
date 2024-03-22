@@ -1,0 +1,2 @@
+"0",""
+"0","plot(test$efficiency,pr.nn_.eff,col='red',main='Real vs predicted efficiency NN',pch=18,cex=0.7, xlim = c(99.85,99.95))"
