@@ -184,6 +184,7 @@ legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 combined <- combined %>%
             mutate(nn_efficiency = c(test.r))
 write.csv(combined, "MLPredictedData.csv")
+
 ```
 
 Resources
