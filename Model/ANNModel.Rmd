@@ -43,8 +43,9 @@ train <- data_cost[index,]
 test <- data_cost[-index,]
 lm.cost <- glm(cost~., data=train) # fitting reg linear regression model
 #summary(lm.fit)
-pr.lm.cost <- predict(lm.cost,test)
-RMSE.lm.cost <- sqrt(sum((pr.lm.cost - test$cost)^2)/nrow(test)) # RMSE is root mean squared error
+pr.lm <- predict(lm.fit,test)
+RMSE.lm <- sqrt(sum((pr.lm - test$cost)^2)/nrow(test)) # RMSE is root mean squared error
+
 
 ```
 
@@ -69,14 +70,15 @@ plot(nn.cost)
 
 # Test neural network
 ```{r}
-pr.nn.cost <- compute(nn.cost,test_ann[,1:4])
-pr.nn_.cost <- pr.nn.cost$net.result*(max(data_cost$cost)-min(data_cost$cost))+min(data_cost$cost)
-test.r <- (test_ann$cost)*(max(data_cost$cost)-min(data_cost$cost))+min(data_cost$cost)
-RMSE.nn.cost <- sqrt(sum((test.r - pr.nn_.cost)^2)/nrow(test_ann))
+pr.nn <- compute(nn,test_[,1:4])
+pr.nn_ <- pr.nn$net.result*(max(data$cost)-min(data$cost))+min(data$cost)
+test.r <- (test_$cost)*(max(data$cost)-min(data$cost))+min(data$cost)
+RMSE.nn <- sqrt(sum((test.r - pr.nn_)^2)/nrow(test_))
 
 
 
-print(paste0("Linear regression RMSE: ",RMSE.lm.cost," and neural network RMSE: ",RMSE.nn.cost))
+print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.nn))
+
 
 # Since LM RMSE is less than NN RMSE, we will proceed with LM for cost
 
@@ -115,13 +117,16 @@ combined <- as.data.frame(test[ ,1:3]) %>%
 
 #apply(data,2,function(x) sum(is.na(x))) # run to make sure no missing data
 
-index <- sample(1:nrow(data),round(0.75*nrow(data)))
+set.seed(500)
+
+
+#index <- sample(1:nrow(data),round(0.75*nrow(data))) Want to assess the same data!
 train <- data[index,]
 test <- data[-index,]
-lm.eff <- glm(efficiency~., data=train) # fitting reg linear regression model
-# summary(lm.fit)
-pr.lm.eff <- predict(lm.eff,test)
-RMSE.lm.eff <- sqrt(sum((pr.lm.eff - test$efficiency)^2)/nrow(test)) # MSE is mean squared error
+lm.fit <- glm(efficiency~., data=train) # fitting reg linear regression model
+#summary(lm.fit)
+pr.lm <- predict(lm.fit,test)
+RMSE.lm <- sum((pr.lm - test$efficiency)^2)/nrow(test) # MSE is mean squared error
 
 ```
 
@@ -146,14 +151,15 @@ plot(nn.eff)
 
 # Test neural network
 ```{r}
-pr.nn.eff <- compute(nn.eff,test_ann[,1:4])
-pr.nn_.eff <- pr.nn.eff$net.result*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
-test.r <- (test_ann$efficiency)*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
-RMSE.nn.eff <- sqrt(sum((test.r - pr.nn_.eff)^2)/nrow(test_ann))
+pr.nn <- compute(nn,test_[,1:4])
+pr.nn_ <- pr.nn$net.result*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
+test.r <- (test_$efficiency)*(max(data$efficiency)-min(data$efficiency))+min(data$efficiency)
+RMSE.nn <- sum((test.r - pr.nn_)^2)/nrow(test_)
 
 
 
-print(paste0("Linear regression RMSE: ",RMSE.lm.eff," and neural network RMSE: ",RMSE.nn.eff))
+print(paste0("Linear regression MSE: ",RMSE.lm," and neural network MSE: ",RMSE.nn))
+
 
 # Since NN RMSE is less than LM RMSE, we will proceed with NN for efficiency
 
@@ -185,6 +191,7 @@ legend('bottomright',legend=c('NN','LM'),pch=18,col=c('red','blue'))
 combined <- combined %>%
             mutate(nn_efficiency = c(test.r))
 write.csv(combined, "MLPredictedData.csv")
+
 ```
 
 ## Predicting Efficient Size and Number of Baffles
